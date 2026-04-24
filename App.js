@@ -1,33 +1,42 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, Button, FlatList, StyleSheet } from 'react-native';
+import { View, Text, TextInput, Button, FlatList, StyleSheet, TouchableOpacity } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-
 export default function App() {
-  const [notes, setNotes] = useState([
-    { id: '1', title: 'Купить молоко', text: 'Не забыть купить молоко в магазине' },
-  ]);
+  const [notes, setNotes] = useState([]); // Пустой массив вместо тестовых данных
   const [title, setTitle] = useState('');
   const [text, setText] = useState('');
+
   useEffect(() => {
     loadNotes();
   }, []);
 
   useEffect(() => {
-    saveNotes(notes);
+    if (notes.length > 0 || notes.length === 0) {
+      saveNotes(notes);
+    }
   }, [notes]);
 
   const loadNotes = async () => {
     try {
       const stored = await AsyncStorage.getItem('notes');
-      if (stored) setNotes(JSON.parse(stored));
-    } catch (e) { console.error(e); }
+      if (stored) {
+        setNotes(JSON.parse(stored));
+      } else {
+        // Если данных нет, оставляем пустой массив
+        setNotes([]);
+      }
+    } catch (e) { 
+      console.error('Ошибка загрузки заметок:', e); 
+    }
   };
 
   const saveNotes = async (newNotes) => {
     try {
       await AsyncStorage.setItem('notes', JSON.stringify(newNotes));
-    } catch (e) { console.error(e); }
+    } catch (e) { 
+      console.error('Ошибка сохранения заметок:', e); 
+    }
   };
 
   const addNote = () => {
@@ -50,6 +59,7 @@ export default function App() {
       <Text style={styles.header}>Заметки</Text>
 
       <View style={styles.form}>
+        <Text style={styles.textinform}>Добавление заметки</Text>
         <TextInput
           style={styles.input}
           placeholder="Заголовок"
@@ -63,7 +73,12 @@ export default function App() {
           value={text}
           onChangeText={setText}
         />
-        <Button title="Добавить заметку" onPress={addNote} color="#555" />
+        <TouchableOpacity 
+          style={styles.addButton} 
+          onPress={addNote}
+        >
+          <Text style={styles.addButtonText}>Добавить</Text>
+        </TouchableOpacity>
       </View>
 
       <View style={styles.divider} />
@@ -75,11 +90,17 @@ export default function App() {
           <View style={styles.noteCard}>
             <Text style={styles.noteTitle}>{item.title}</Text>
             <Text style={styles.noteText}>{item.text}</Text>
-            <View style={{ marginTop: 10 }}>
-              <Button title="Удалить" onPress={() => deleteNote(item.id)} color="#c00" />
-            </View>
+            <TouchableOpacity 
+              style={styles.deleteButton} 
+              onPress={() => deleteNote(item.id)}
+            >
+              <Text style={styles.deleteButtonText}>Удалить</Text>
+            </TouchableOpacity>
           </View>
         )}
+        ListEmptyComponent={
+          <Text style={styles.emptyText}>Нет заметок. Добавьте первую!</Text>
+        }
       />
     </View>
   );
@@ -101,34 +122,81 @@ const styles = StyleSheet.create({
   },
   form: {
     marginBottom: 15,
+    backgroundColor: '#e0e0e0',
+    padding: 10,
+    borderRadius: 20,
+  },
+  textinform: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#333',
+    marginBottom: 5,
+    textAlign: 'center',
   },
   input: {
     backgroundColor: '#fff',
     borderWidth: 1,
     borderColor: '#ddd',
-    borderRadius: 8,
+    borderRadius: 10,
     padding: 10,
     marginBottom: 10,
     fontSize: 16,
   },
+  addButton: {
+    backgroundColor: '#a0a0a0',
+    paddingVertical: 5,
+    paddingHorizontal: 5,
+    borderRadius: 10,       
+    alignItems: 'center',
+    marginTop: 5,
+  },
+  addButtonText: {
+    color: '#fff',
+    fontSize: 20,
+    fontWeight: 'bold',
+  },
   divider: {
-    height: 1,
-    backgroundColor: '#333',
-    marginVertical: 15,
+    height: 2,
+    backgroundColor: '#a0a0a0',
+    marginVertical: 5,
+    marginBottom: 20,
+    borderRadius: 10,
   },
   noteCard: {
-    backgroundColor: '#fff',
-    padding: 15,
-    borderRadius: 10,
+    backgroundColor: '#e0e0e0',
+    padding: 10,
+    borderRadius: 20,
     marginBottom: 10,
   },
   noteTitle: {
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: 'bold',
     marginBottom: 5,
+    marginStart: 5,
   },
   noteText: {
+    fontSize: 13,
+    color: '#424242',
+    marginStart: 5,
+  },
+  deleteButton: {
+    backgroundColor: 'rgb(208, 81, 81)',
+    paddingVertical: 7,
+    paddingHorizontal: 148,
+    borderRadius: 10,
+    alignItems: 'center',
+    marginTop: 10,
+    alignSelf: 'center', 
+  },
+  deleteButtonText: {
+    color: '#fff',
     fontSize: 14,
-    color: '#555',
+    fontWeight: '500',
+  },
+  emptyText: {
+    textAlign: 'center',
+    color: '#a0a0a0',
+    fontSize: 15,
+    marginTop: 50,
   },
 });
