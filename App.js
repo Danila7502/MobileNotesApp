@@ -1,5 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, Button, FlatList, StyleSheet } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
 
 export default function App() {
   const [notes, setNotes] = useState([
@@ -7,6 +9,26 @@ export default function App() {
   ]);
   const [title, setTitle] = useState('');
   const [text, setText] = useState('');
+  useEffect(() => {
+    loadNotes();
+  }, []);
+
+  useEffect(() => {
+    saveNotes(notes);
+  }, [notes]);
+
+  const loadNotes = async () => {
+    try {
+      const stored = await AsyncStorage.getItem('notes');
+      if (stored) setNotes(JSON.parse(stored));
+    } catch (e) { console.error(e); }
+  };
+
+  const saveNotes = async (newNotes) => {
+    try {
+      await AsyncStorage.setItem('notes', JSON.stringify(newNotes));
+    } catch (e) { console.error(e); }
+  };
 
   const addNote = () => {
     if (title.trim() && text.trim()) {
