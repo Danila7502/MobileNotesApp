@@ -1,15 +1,47 @@
 import React, { useState } from 'react';
-import { View, Text, FlatList, StyleSheet } from 'react-native';
+import { View, Text, TextInput, Button, FlatList, StyleSheet } from 'react-native';
 
 export default function App() {
   const [notes, setNotes] = useState([
     { id: '1', title: 'Купить молоко', text: 'Не забыть купить молоко в магазине' },
-    { id: '2', title: 'Позвонить маме', text: 'Вечером позвонить маме' },
   ]);
+  const [title, setTitle] = useState('');
+  const [text, setText] = useState('');
+
+  const addNote = () => {
+    if (title.trim() && text.trim()) {
+      setNotes([
+        ...notes,
+        { id: Date.now().toString(), title: title.trim(), text: text.trim() }
+      ]);
+      setTitle('');
+      setText('');
+    }
+  };
 
   return (
     <View style={styles.container}>
       <Text style={styles.header}>Заметки</Text>
+
+      <View style={styles.form}>
+        <TextInput
+          style={styles.input}
+          placeholder="Заголовок"
+          value={title}
+          onChangeText={setTitle}
+        />
+        <TextInput
+          style={[styles.input, { minHeight: 60 }]}
+          placeholder="Текст"
+          multiline
+          value={text}
+          onChangeText={setText}
+        />
+        <Button title="Добавить заметку" onPress={addNote} color="#555" />
+      </View>
+
+      <View style={styles.divider} />
+
       <FlatList
         data={notes}
         keyExtractor={item => item.id}
@@ -35,24 +67,35 @@ const styles = StyleSheet.create({
     fontSize: 40,
     fontWeight: 'bold',
     color: '#333',
-    marginBottom: 20,
+    marginBottom: 15,
     textAlign: 'center',
+  },
+  form: {
+    marginBottom: 15,
+  },
+  input: {
+    backgroundColor: '#fff',
+    borderWidth: 1,
+    borderColor: '#ddd',
+    borderRadius: 8,
+    padding: 10,
+    marginBottom: 10,
+    fontSize: 16,
+  },
+  divider: {
+    height: 1,
+    backgroundColor: '#333',
+    marginVertical: 15,
   },
   noteCard: {
     backgroundColor: '#fff',
     padding: 15,
     borderRadius: 10,
     marginBottom: 10,
-    shadowColor: '#ccc',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 2,
-    elevation: 2,
   },
   noteTitle: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: '#222',
     marginBottom: 5,
   },
   noteText: {
