@@ -19,6 +19,10 @@ export default function App() {
     }
   };
 
+  const deleteNote = (id) => {
+    setNotes(notes.filter(note => note.id !== id));
+  };
+
   return (
     <View style={styles.container}>
       <Text style={styles.header}>Заметки</Text>
@@ -49,6 +53,9 @@ export default function App() {
           <View style={styles.noteCard}>
             <Text style={styles.noteTitle}>{item.title}</Text>
             <Text style={styles.noteText}>{item.text}</Text>
+            <View style={{ marginTop: 10 }}>
+              <Button title="Удалить" onPress={() => deleteNote(item.id)} color="#c00" />
+            </View>
           </View>
         )}
       />
